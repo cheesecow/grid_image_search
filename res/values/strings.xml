@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GridImageSearch</string>
+    <string name="action_settings">Settings</string>
+    <string name="search_options">Search Options</string>
+    <string name="query_hint">Enter search term</string>
+    <string name="search_button">Search</string>
+    <string name="title_activity_image_display">ImageDisplayActivity</string>
+    <string name="title_activity_search_options">SearchOptions</string>
+
+    <string-array name="size">
+        <item>small</item>
+        <item>medium</item>
+        <item>large</item>
+    </string-array>
+
+    <string-array name="color_filter">
+        <item>black</item>
+        <item>blue</item>
+        <item>brown</item>
+    </string-array>
+    
+    
+    
+</resources>
