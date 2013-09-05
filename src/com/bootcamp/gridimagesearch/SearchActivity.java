@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,9 +26,12 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 public class SearchActivity extends Activity {
+	public static final String SEARCH_OPTIONS = "SearchOptions";
 	EditText etQuery;
 	GridView gvResults;
 	Button btnSearch;
+	String currentQuery = "";
+	Integer current_page = 0;
 	ArrayList<ImageResult> imageResults = new ArrayList<ImageResult>();
 	ImageResultArrayAdapter imageAdapter;
 	
@@ -68,18 +72,42 @@ public class SearchActivity extends Activity {
 		btnSearch = (Button) findViewById(R.id.btnSearch);
 	}
 	
-	public void onImageSearch(View v){
+	public String bulidQueryString(String query){
+		SharedPreferences settings = getSharedPreferences(SEARCH_OPTIONS, 0);
+		String built_query = "https://ajax.googleapis.com/ajax/services/search/images?rsz=8&"+"start="+
+		current_page +
+		"&v=1.0&q=" +
+		Uri.encode(query) +
+		"&imgcolor="+
+		settings.getString("color_filter", "''") +
+		"&imgsz="+
+		settings.getString("image_size", "'small'") +
+		"&imgtype="+
+		settings.getString("image_type", "''") +
+		"&as_sitesearch="+
+		settings.getString("etSiteFilter", "''");
+
+		return built_query;
+
+	}
+
+	public void loadMore(View v){
 		String query = etQuery.getText().toString();
-		Toast.makeText(this, "Searching for " + query, Toast.LENGTH_LONG).show();
+		SharedPreferences settings = getSharedPreferences(SEARCH_OPTIONS, 0);
+		current_page += 8;
+		queryGoogle(query);
+	}
+
+	public void queryGoogle(String query){
 		AsyncHttpClient client = new AsyncHttpClient();
-		client.get("https://ajax.googleapis.com/ajax/services/search/images?rsz=8&"+"start="+ 0 + "&v=1.0&q=" + Uri.encode(query),    
+		client.get(bulidQueryString(query),
 				   new JsonHttpResponseHandler(){
 					@Override
 					public void onSuccess(JSONObject response){
 						JSONArray imageJsonResults = null;
 						try{
 							imageJsonResults = response.getJSONObject("responseData").getJSONArray("results");
-							imageResults.clear();
+//							imageResults.clear();
 							imageAdapter.addAll(ImageResult.fromJSONArray(imageJsonResults));
 							Log.d("DEBUG", imageJsonResults.toString());
 						} catch (JSONException e){
@@ -89,6 +117,16 @@ public class SearchActivity extends Activity {
 					}
 		);
 
+	}
+
+	public void onImageSearch(View v){
+		String query = etQuery.getText().toString();
+		if (query != currentQuery){
+			current_page = 0;
+			currentQuery = query;
+		}
+		Toast.makeText(this, "Searching for " + query, Toast.LENGTH_LONG).show();
+		queryGoogle(query);
 	}
 
 }
